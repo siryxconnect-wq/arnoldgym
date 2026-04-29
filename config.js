@@ -17,8 +17,8 @@
 window.SIRYX_CONFIG = {
 
   // LICENCIA DEL GYM (generada desde el keygen)
-  gymId:  'id_del_gym',       // ID exacto que usaste en el keygen
-  gymKey: '',                 // Clave XXXX-XXXX-XXXX del keygen
+  gymId:  'id_del_gym',       // arnold_gym
+  gymKey: '',                 // 0FVF-0G2A-0765
 
   // API DE INTELIGENCIA ARTIFICIAL
   groqKey: '',                // Tu clave de Groq (console.groq.com)

@@ -3640,11 +3640,16 @@ if(window.SIRYX_CONFIG){
     cfg.groqKey = window.SIRYX_CONFIG.groqKey;
   }
   // Verificar licencia del gym — misma lógica que el keygen
-  if(window.SIRYX_CONFIG.gymId && window.SIRYX_CONFIG.gymKey){
-    if(!verificarLicenciaGym(window.SIRYX_CONFIG.gymId, window.SIRYX_CONFIG.gymKey)){
-      mostrarBloqueoGym();
-    }
+// Verificar licencia — bloquear si no hay clave o está vencida
+  const _gid=window.SIRYX_CONFIG.gymId||'';
+  const _gkey=window.SIRYX_CONFIG.gymKey||'';
+  if(!_gid||!_gkey||!verificarLicenciaGym(_gid,_gkey)){
+    mostrarBloqueoGym();
   }
+}
+// Si no hay config.js tampoco dejar pasar
+if(!window.SIRYX_CONFIG){
+  mostrarBloqueoGym();
 }
 // Aplicar color guardado inmediatamente antes del splash
 if(cfg.accentColor) aplicarColor(cfg.accentColor);

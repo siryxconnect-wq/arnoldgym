@@ -369,6 +369,16 @@ select.f-input option{background:var(--s2)}
 .color-preset-wiz{width:32px;height:32px;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0}
 .color-preset-wiz:hover{transform:scale(1.15);border-color:#fff}
 .color-preset-wiz.selected{border-color:#fff;box-shadow:0 0 0 2px var(--accent)}
+
+/* ══ NOTIFICACIONES ══ */
+.notif-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:700;font-family:'Oswald',sans-serif;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:pulse 2s infinite}
+.notif-card{background:var(--s2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.notif-card.nueva{border-left-color:var(--red)}
+.notif-tipo{font-size:10px;font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.notif-titulo{font-size:14px;font-weight:600}
+.notif-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.notif-fecha{font-size:10px;color:var(--muted);font-family:var(--mono)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 </style>
 <!-- Configuración SiryX — no modificar -->
 <script src="config.js" onerror="console.warn('config.js no encontrado')"></script>
@@ -559,7 +569,11 @@ select.f-input option{background:var(--s2)}
   <div class="header-right">
     <div class="clock" id="clockEl">--:--</div>
     <div class="role-badge role-admin" id="roleBadge">Admin</div>
-    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+    <div style="position:relative;display:inline-flex" id="notifBtnWrap">
+    <button class="icon-btn" onclick="abrirNotificaciones()" title="Notificaciones" id="notifBtn">🔔</button>
+    <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+  </div>
+  <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
     <button class="icon-btn" onclick="cerrarSesion()" title="Cerrar sesión" style="font-size:12px">🚪</button>
     <button class="icon-btn" onclick="openCfg()" title="Configuración">⚙️</button>
   </div>
@@ -982,6 +996,7 @@ function iniciarApp(){
   rol=cfg.rol;
   actualizarHeaderLogo();
   renderTabs();
+  setTimeout(actualizarBadge,500);
 }
 
 function renderTabs(){
@@ -1002,6 +1017,7 @@ function renderTabs(){
       {id:'clases',icon:'📅',label:'Clases'},
       {id:'tienda',icon:'🛍️',label:'Tienda'},
       {id:'mensajes',icon:'💬',label:'Mensajes'},
+      {id:'notificaciones',icon:'🔔',label:'Notifs'},
     ];
     document.getElementById('roleBadge').textContent='Admin';
     document.getElementById('roleBadge').className='role-badge role-admin';
@@ -1019,6 +1035,7 @@ function renderTabs(){
   } else {
     tabs=[
       {id:'mionboarding', icon:'🎯', label:'Mi Plan'},
+      {id:'minotifs',     icon:'🔔', label:'Novedades'},
       {id:'micliente',    icon:'👤', label:'Membresía'},
       {id:'miprogreso',   icon:'📊', label:'Progreso'},
       {id:'mirutina',     icon:'🏋️', label:'Rutina'},
@@ -1063,9 +1080,12 @@ function renderTab(id){
     minutricion:  renderMiNutricionHTML,
     milogros:     renderMiLogrosHTML,
     misclases:    renderMiClasesHTML,
+    clases:       renderClasesAdminHTML,
     miasistencia: renderMiAsistenciaHTML,
     micoach:      renderMiCoachHTML,
     mensajes:     renderMensajesHTML,
+    notificaciones: renderNotificacionesAdminHTML,
+    minotifs:     renderMiNotifsHTML,
     tienda:       renderTiendaAdminHTML,
     mitienda:     renderMiTiendaHTML,
   }[id];
@@ -3679,6 +3699,175 @@ function eliminarMiembro(mid, nombre){
   renderTab('miembros');
   toast('🗑 '+nombre+' eliminado correctamente');
 }
+
+// ══════════════════════════════════════════
+//  SISTEMA DE NOTIFICACIONES
+// ══════════════════════════════════════════
+function getNotifs(){ return JSON.parse(localStorage.getItem('sg_notifs')||'[]'); }
+function saveNotifs(n){ localStorage.setItem('sg_notifs',JSON.stringify(n)); }
+function getLeidas(){ return JSON.parse(localStorage.getItem('sg_notifs_leidas')||'[]'); }
+function marcarLeida(id){ const l=getLeidas(); if(!l.includes(id)){l.push(id);localStorage.setItem('sg_notifs_leidas',JSON.stringify(l));} }
+
+function contarNoLeidas(){
+  const notifs=getNotifs();
+  const leidas=new Set(getLeidas());
+  return notifs.filter(n=>!leidas.has(n.id)).length;
+}
+
+function actualizarBadge(){
+  const count=contarNoLeidas();
+  const badge=document.getElementById('notifBadge');
+  const wrap=document.getElementById('notifBtnWrap');
+  if(badge){
+    if(count>0){ badge.style.display='flex'; badge.textContent=count>9?'9+':count; }
+    else { badge.style.display='none'; }
+  }
+  // Solo mostrar el botón de notif al cliente
+  if(wrap) wrap.style.display=(rol==='client')?'inline-flex':'none';
+}
+
+function abrirNotificaciones(){
+  // Marcar todas como leídas
+  const notifs=getNotifs();
+  notifs.forEach(n=>marcarLeida(n.id));
+  actualizarBadge();
+  renderTab('minotifs');
+  // Scroll al tab
+  document.querySelector('[data-tab="minotifs"]')?.click();
+}
+
+// ── VISTA ADMIN ──
+function renderNotificacionesAdminHTML(){
+  const notifs=getNotifs();
+  const tiposIcon={clase:'📅',oferta:'🏷️',evento:'🎉',general:'📢'};
+
+  return '<div class="card">'
+    +'<div class="card-title">🔔 Crear notificación</div>'
+    +'<div class="f-field"><label>Tipo</label>'
+    +'<select class="f-input" id="nTipo" style="width:100%">'
+    +'<option value="clase">📅 Nueva clase grupal</option>'
+    +'<option value="oferta">🏷️ Oferta en tienda</option>'
+    +'<option value="evento">🎉 Evento especial</option>'
+    +'<option value="general">📢 Anuncio general</option>'
+    +'</select></div>'
+    +'<div class="f-field"><label>Título</label>'
+    +'<input class="f-input" id="nTitulo" placeholder="Ej: Nueva clase de Spinning los Viernes"></div>'
+    +'<div class="f-field"><label>Descripción</label>'
+    +'<textarea class="f-input" id="nDesc" placeholder="Detalles de la novedad..." style="min-height:70px;resize:none"></textarea></div>'
+    +'<div style="display:flex;gap:8px;margin-top:4px">'
+    +'<button class="btn btn-lime" onclick="crearNotif()" style="flex:1">📢 Publicar</button>'
+    +'<button class="btn btn-outline" onclick="enviarNotifWA()" style="flex:1;clip-path:none">📱 WA Masivo</button>'
+    +'</div></div>'
+    +'<div class="card"><div class="card-title">📋 Notificaciones publicadas</div>'
+    +(notifs.length
+      ? '<div style="display:flex;flex-direction:column;gap:8px">'
+        +notifs.slice().reverse().map(n=>
+          '<div class="notif-card">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between">'
+          +'<div class="notif-tipo">'+(tiposIcon[n.tipo]||'📢')+' '+n.tipo+'</div>'
+          +'<div style="display:flex;align-items:center;gap:6px">'
+          +'<span class="notif-fecha">'+fmtF(n.fecha)+'</span>'
+          +'<button class="btn-xs btn-xs-red" data-nid="'+n.id+'" onclick="eliminarNotif(this.dataset.nid)">✕</button>'
+          +'</div></div>'
+          +'<div class="notif-titulo">'+n.titulo+'</div>'
+          +(n.desc?'<div class="notif-desc">'+n.desc+'</div>':'')
+          +'</div>'
+        ).join('')+'</div>'
+      : '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px">Sin notificaciones publicadas</div>'
+    )+'</div>';
+}
+
+function crearNotif(){
+  const tipo=document.getElementById('nTipo').value;
+  const titulo=document.getElementById('nTitulo').value.trim();
+  const desc=document.getElementById('nDesc').value.trim();
+  if(!titulo){toast('❌ Escribe un título');return;}
+  const notifs=getNotifs();
+  notifs.push({id:'n'+Date.now(),tipo,titulo,desc,fecha:hoy(),nueva:true});
+  saveNotifs(notifs);
+  document.getElementById('nTitulo').value='';
+  document.getElementById('nDesc').value='';
+  renderTab('notificaciones');
+  toast('✅ Notificación publicada');
+}
+
+function eliminarNotif(id){
+  const notifs=getNotifs().filter(n=>n.id!==id);
+  saveNotifs(notifs);
+  renderTab('notificaciones');
+  toast('🗑 Notificación eliminada');
+}
+
+function enviarNotifWA(){
+  const titulo=document.getElementById('nTitulo').value.trim();
+  const desc=document.getElementById('nDesc').value.trim();
+  const tipo=document.getElementById('nTipo').value;
+  if(!titulo){toast('❌ Escribe el título primero');return;}
+  const tiposLabel={clase:'Nueva clase grupal',oferta:'Oferta especial',evento:'Evento especial',general:'Novedad'};
+  const gym=cfg.gym||'el gym';
+  let msg='📢 *'+tiposLabel[tipo]+' en '+gym+'*\n\n';
+  msg+='*'+titulo+'*\n';
+  if(desc) msg+=desc+'\n';
+  msg+='\n_'+gym+' — powered by SiryX_';
+
+  // Obtener teléfonos de miembros activos
+  const tels=miembros.filter(m=>m.activo&&m.tel&&!m.bloqueado).map(m=>m.tel.replace(/\D/g,''));
+
+  if(!tels.length){
+    // Enviar al número del gym como prueba
+    const tel=cfg.telGym||'573203694094';
+    window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msg),'_blank');
+    toast('⚠️ Sin miembros con teléfono — enviado al gym como prueba');
+    return;
+  }
+
+  // Abrir WhatsApp para cada miembro (primero 3 para no saturar)
+  const primeros=tels.slice(0,3);
+  primeros.forEach((tel,i)=>{
+    setTimeout(()=>{
+      window.open('https://wa.me/57'+tel+'?text='+encodeURIComponent(msg),'_blank');
+    },i*500);
+  });
+
+  if(tels.length>3){
+    toast('📱 Abriendo WA para primeros 3 de '+tels.length+' miembros. Repite para los demás.');
+  } else {
+    toast('📱 Enviando a '+tels.length+' miembro(s)');
+  }
+}
+
+// ── VISTA CLIENTE ──
+function renderMiNotifsHTML(){
+  const m=getMiembro(); if(!m) return '';
+  const notifs=getNotifs();
+  const leidas=new Set(getLeidas());
+  const tiposIcon={clase:'📅',oferta:'🏷️',evento:'🎉',general:'📢'};
+  const tiposColor={clase:'var(--accent)',oferta:'var(--orange)',evento:'#ff69b4',general:'var(--muted)'};
+
+  if(!notifs.length) return '<div class="card"><div class="card-title">🔔 Novedades</div><div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin novedades por el momento</div></div>';
+
+  // Marcar todas como leídas al ver
+  notifs.forEach(n=>marcarLeida(n.id));
+  actualizarBadge();
+
+  return '<div class="card"><div class="card-title">🔔 Novedades del gym</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">'
+    +notifs.slice().reverse().map(n=>{
+      const nueva=!leidas.has(n.id);
+      return '<div class="notif-card '+(nueva?'nueva':'')+'">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between">'
+        +'<div class="notif-tipo" style="color:'+(tiposColor[n.tipo]||'var(--accent)')+'">'+
+        (tiposIcon[n.tipo]||'📢')+' '+n.tipo+'</div>'
+        +(nueva?'<span style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;font-family:Oswald,sans-serif">NUEVO</span>':'')
+        +'</div>'
+        +'<div class="notif-titulo">'+n.titulo+'</div>'
+        +(n.desc?'<div class="notif-desc">'+n.desc+'</div>':'')
+        +'<div class="notif-fecha">'+fmtF(n.fecha)+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div></div>';
+}
+
 
 applyTheme();
 // Cargar configuración de config.js

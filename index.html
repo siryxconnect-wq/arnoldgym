@@ -3591,6 +3591,48 @@ function wizardFinalizar(){
 }
 
 
+// ══════════════════════════════════════════
+//  LICENCIA DEL GYM — mismo algoritmo keygen
+// ══════════════════════════════════════════
+const GYM_SECRET='SiryX2024$Connect#';
+
+function hashGym(str){
+  let h=5381;
+  for(let i=0;i<str.length;i++) h=((h<<5)+h)^str.charCodeAt(i);
+  return Math.abs(h);
+}
+
+function verificarLicenciaGym(gymId, key){
+  try{
+    const p=key.trim().toUpperCase().split('-');
+    if(p.length!==3) return false;
+    const dI=parseInt(p[0],36);
+    const dF=parseInt(p[1],36);
+    const ck=p[2];
+    const seed=GYM_SECRET+'|'+gymId.toLowerCase().trim()+'|'+dI+'|'+dF;
+    const exp=('000'+(hashGym(seed)%9999+1000)).slice(-4);
+    if(ck!==exp) return false;
+    const hoy=Math.floor(Date.now()/86400000);
+    return hoy>=dI && hoy<=dF+2;
+  }catch(e){ return false; }
+}
+
+function mostrarBloqueoGym(){
+  const splash=document.getElementById('splash');
+  if(splash) splash.style.display='none';
+  document.body.insertAdjacentHTML('beforeend',
+    '<div style="position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:Oswald,sans-serif;text-align:center;padding:20px">'
+    +'<div style="font-size:56px">🔒</div>'
+    +'<div style="font-size:26px;letter-spacing:4px;color:#0066FF">SERVICIO SUSPENDIDO</div>'
+    +'<div style="font-size:14px;color:#555;max-width:300px;line-height:1.7">El plan de este gimnasio ha vencido o no está activo.</div>'
+    +'<div style="font-size:13px;color:#333;margin-top:4px">Para reactivar contacta a:</div>'
+    +'<div style="font-size:15px;color:#fff;font-weight:700;letter-spacing:2px">SiryX Connect</div>'
+    +'<a href="https://wa.me/573203694094" style="background:#0066FF;color:#fff;padding:12px 28px;font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;text-decoration:none;margin-top:8px;display:block">📱 CONTACTAR AHORA</a>'
+    +'</div>'
+  );
+}
+
+
 applyTheme();
 // Cargar configuración de config.js
 if(window.SIRYX_CONFIG){

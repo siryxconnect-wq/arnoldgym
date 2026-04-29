@@ -1,31 +1,22 @@
 /**
- * SiryX Gym — Configuración
- * ─────────────────────────────────────────
- * INSTRUCCIONES PARA ACTIVAR UN GYM NUEVO:
+ * SiryX Connect — Licencia del cliente
+ * ─────────────────────────────────────
+ * INSTRUCCIONES:
+ * 1. Abre el keygen
+ * 2. Registra el cliente con su ID
+ * 3. Genera la clave con las fechas
+ * 4. Pon el ID y la clave abajo
+ * 5. Sube a GitHub
  *
- * 1. Abre el keygen (siryx-keygen.html)
- * 2. Ve a la pestaña 🏋️ SiryX Gym
- * 3. Agrega el gym con su nombre e ID (ej: olympo_gym)
- * 4. Genera la clave con las fechas del plan
- * 5. Copia el ID y la clave aquí abajo
- * 6. Sube este archivo a GitHub
- *
- * PARA SUSPENDER: borra el gymKey y guarda en GitHub
- * ─────────────────────────────────────────
+ * RENOVAR: nueva clave → actualiza gymKey → sube
+ * SUSPENDER: borra gymKey → sube
+ * ─────────────────────────────────────
+ * NOTA: La clave de Groq (IA) la configura
+ * cada dueño desde ⚙️ dentro de la app.
+ * ─────────────────────────────────────
  */
 
 window.SIRYX_CONFIG = {
-
-  // LICENCIA DEL GYM (generada desde el keygen)
-  gymId:  'arnold_gym',       // arnold_gym
-  gymKey: '0FVG-0G2A-5683',                 // pago invalido
-
-  // API DE INTELIGENCIA ARTIFICIAL
-  groqKey: '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',                // Tu clave de Groq (console.groq.com)
-
-  // INFO
-  version:   '2.0',
-  producto:  'SiryX Gym',
-  proveedor: 'SiryX Connect — WhatsApp 320 369 4094'
-
+  gymId:  '',   // ID del cliente (mismo que en el keygen)
+  gymKey: '',   // Clave XXXX-XXXX-XXXX del keygen
 };

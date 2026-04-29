@@ -379,6 +379,17 @@ select.f-input option{background:var(--s2)}
 .notif-desc{font-size:12px;color:var(--muted);line-height:1.5}
 .notif-fecha{font-size:10px;color:var(--muted);font-family:var(--mono)}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+
+/* ══ TICKER DE NOTICIAS ══ */
+.ticker-wrap{background:#000;border-bottom:2px solid var(--accent);overflow:hidden;height:28px;display:none;align-items:center;flex-shrink:0}
+.ticker-wrap.visible{display:flex}
+.ticker-label{background:var(--accent);color:#fff;font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:0 12px;height:100%;display:flex;align-items:center;white-space:nowrap;flex-shrink:0;text-transform:uppercase}
+.ticker-track{display:flex;align-items:center;overflow:hidden;flex:1;position:relative;height:100%}
+.ticker-content{display:flex;gap:0;position:absolute;white-space:nowrap;animation:ticker-scroll 30s linear infinite;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.5px;color:#fff;align-items:center;height:100%}
+.ticker-content:hover{animation-play-state:paused}
+.ticker-item{padding:0 32px;display:flex;align-items:center;gap:8px}
+.ticker-item::after{content:'•';color:var(--accent);margin-left:32px}
+@keyframes ticker-scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
 </style>
 <!-- Configuración SiryX — no modificar -->
 <script src="config.js" onerror="console.warn('config.js no encontrado')"></script>
@@ -580,6 +591,14 @@ select.f-input option{background:var(--s2)}
 </header>
 
 <!-- TABS (dinámicos por rol) -->
+<!-- TICKER DE NOTICIAS -->
+<div class="ticker-wrap" id="tickerWrap">
+  <div class="ticker-label">📢 NOVEDADES</div>
+  <div class="ticker-track">
+    <div class="ticker-content" id="tickerContent"></div>
+  </div>
+</div>
+
 <div class="tabs-nav" id="tabsNav"></div>
 
 <main id="mainContent"></main>
@@ -997,6 +1016,7 @@ function iniciarApp(){
   actualizarHeaderLogo();
   renderTabs();
   setTimeout(actualizarBadge,500);
+  setTimeout(actualizarTicker,600);
 }
 
 function renderTabs(){
@@ -1051,6 +1071,7 @@ function renderTabs(){
 
   nav.innerHTML=tabs.map((t,i)=>`<button class="tab-btn${i===0?' active':''}" onclick="switchTab('${t.id}',this)">${t.icon} ${t.label}</button>`).join('');
   renderTab(tabs[0].id);
+  setTimeout(actualizarTicker,300);
 }
 
 function switchTab(id,btn){
@@ -3788,6 +3809,7 @@ function crearNotif(){
   document.getElementById('nTitulo').value='';
   document.getElementById('nDesc').value='';
   renderTab('notificaciones');
+  actualizarTicker();
   toast('✅ Notificación publicada');
 }
 
@@ -3866,6 +3888,38 @@ function renderMiNotifsHTML(){
         +'</div>';
     }).join('')
     +'</div></div>';
+}
+
+
+// ══ TICKER DE NOTICIAS ══
+function actualizarTicker(){
+  const notifs=getNotifs();
+  const wrap=document.getElementById('tickerWrap');
+  const content=document.getElementById('tickerContent');
+  if(!wrap||!content) return;
+
+  // Solo mostrar al cliente
+  if(rol!=='client'||!notifs.length){
+    wrap.classList.remove('visible');
+    return;
+  }
+
+  wrap.classList.add('visible');
+  const tiposIcon={clase:'📅',oferta:'🏷️',evento:'🎉',general:'📢'};
+
+  // Duplicar el contenido para que el scroll sea continuo
+  const items = notifs.slice().reverse().slice(0,8).map(n=>
+    '<div class="ticker-item">'+(tiposIcon[n.tipo]||'📢')+' <b>'+n.titulo+'</b>'+(n.desc?' — '+n.desc:'')+'</div>'
+  ).join('');
+
+  content.innerHTML = items + items; // duplicado para loop continuo
+
+  // Ajustar velocidad según cantidad de texto
+  const totalChars = notifs.reduce((a,n)=>a+n.titulo.length+(n.desc?.length||0),0);
+  const duration = Math.max(20, Math.min(60, totalChars * 0.3));
+  content.style.animation = 'none';
+  content.offsetHeight; // force reflow
+  content.style.animation = 'ticker-scroll '+duration+'s linear infinite';
 }
 
 

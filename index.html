@@ -3420,6 +3420,8 @@ function loginCliente(){
   const err=document.getElementById('actErr');
   if(!nombre){err.textContent='Ingresa tu nombre';return;}
   if(!clave){err.textContent='Ingresa la clave del gym';return;}
+
+  // Verificar clave del gym
   const claveGym=cfg.claveCliente||'cliente2024';
   if(clave!==claveGym){
     err.textContent='Clave incorrecta. Consulta con tu gym.';
@@ -3427,26 +3429,29 @@ function loginCliente(){
     if(navigator.vibrate) navigator.vibrate(200);
     return;
   }
-  // Verificar si el cliente está bloqueado
+
+  // Buscar miembro registrado por el admin
   const nombreBuscar=nombre.toLowerCase().trim();
-  const miembroCheck=miembros.find(m=>m.nombre.toLowerCase().trim()===nombreBuscar);
-  if(miembroCheck&&miembroCheck.bloqueado){
+  const miembroEncontrado=miembros.find(m=>
+    m.nombre.toLowerCase().trim()===nombreBuscar
+  );
+
+  // Si no está registrado → no puede entrar
+  if(!miembroEncontrado){
+    err.textContent='No estás registrado en este gym. Habla con tu entrenador para que te registre.';
+    if(navigator.vibrate) navigator.vibrate([200,100,200]);
+    return;
+  }
+
+  // Si está bloqueado → no puede entrar
+  if(miembroEncontrado.bloqueado){
     err.textContent='Tu acceso ha sido suspendido. Contacta a tu gym para más información.';
     document.getElementById('claveCliente').value='';
     if(navigator.vibrate) navigator.vibrate([200,100,200]);
     return;
   }
-  // Buscar si ya existe un miembro con ese nombre
-  let miembroEncontrado=miembros.find(m=>
-    m.nombre.toLowerCase().trim()===nombre.toLowerCase().trim()
-  );
-  // Si no existe, crear un perfil temporal
-  if(!miembroEncontrado){
-    const nuevoId='cli_'+nombre.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
-    miembroEncontrado={id:nuevoId,nombre:nombre,activo:true,creadoEl:new Date().toISOString(),temporal:true};
-    miembros.push(miembroEncontrado);
-    save();
-  }
+
+  // Todo OK — entrar
   cfg.clienteActivo=miembroEncontrado.id;
   clienteActivo=miembroEncontrado.id;
   cfg.rol='client'; rol='client';

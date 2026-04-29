@@ -21,7 +21,7 @@ window.SIRYX_CONFIG = {
   gymKey: '0FVG-0G2A-5683',                 // pago invalido
 
   // API DE INTELIGENCIA ARTIFICIAL
-  groqKey: '',                // Tu clave de Groq (console.groq.com)
+  groqKey: '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',                // Tu clave de Groq (console.groq.com)
 
   // INFO
   version:   '2.0',

@@ -800,14 +800,14 @@ select.f-input option{background:var(--s2)}
       <div style="border-top:1px solid var(--border);padding-top:12px">
         <div style="font-size:11px;color:var(--accent);font-weight:700;font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🤖 APIs de Inteligencia Artificial</div>
         <div class="f-field">
-          <label>OpenAI API Key (sk-...)</label>
+          <label>API OpenAI (sk-...)</label>
           <input class="f-input" id="cfgOpenAI" type="password" placeholder="sk-xxxxxxxxxxxxxxxx">
           <div style="font-size:10px;color:var(--muted);margin-top:2px">platform.openai.com → API keys</div>
         </div>
         <div class="f-field" style="margin-top:8px">
-          <label>Groq API Key — Gratis (gsk_...)</label>
+          <label>API Groq (gsk_...)</label>
           <input class="f-input" id="cfgGroq" type="password" placeholder="gsk_xxxxxxxxxxxxxxxx">
-          <div style="font-size:10px;color:var(--muted);margin-top:2px">console.groq.com → API keys (gratis)</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">console.groq.com → API keys</div>
         </div>
       </div>
 
@@ -1708,7 +1708,7 @@ async function callAI(messages, maxTokens=1200){
 }
 
 function noKeyMsg(){
-  return `<div class="alert alert-warn">⚙ Configura tu API Key en el botón <b>⚙</b> → sección IA.<br>Puedes usar <b>Groq gratis</b> (console.groq.com) o <b>OpenAI</b> si tienes créditos.</div>`;
+  return `<div class="alert alert-warn">⚙ Configura tu API Key en el botón <b>⚙</b> → sección IA.<br>Puedes usar <b>Groq</b> (console.groq.com) o <b>OpenAI</b> si tienes créditos.</div>`;
 }
 
 function formatAIResponse(text){
@@ -1725,7 +1725,7 @@ function renderIAHTML(){
   const hasKey = cfg.openaiKey||cfg.groqKey;
   const providerSelector = `
     <div class="ai-provider">
-      <button class="provider-btn ${aiProvider==='groq'?'active':''}" onclick="setProvider('groq')">🆓 Groq (Gratis)</button>
+      <button class="provider-btn ${aiProvider==='groq'?'active':''}" onclick="setProvider('groq')">Groq</button>
       <button class="provider-btn ${aiProvider==='openai'?'active':''}" onclick="setProvider('openai')">💳 OpenAI</button>
     </div>`;
 
@@ -3637,6 +3637,25 @@ function mostrarBloqueoGym(){
   );
 }
 
+
+function eliminarMiembro(mid, nombre){
+  if(!confirm('¿Eliminar a '+nombre+' permanentemente?\nSe borrarán todos sus datos: rutinas, progreso, medidas y asistencia.')) return;
+  // Eliminar miembro
+  miembros=miembros.filter(m=>m.id!==mid);
+  // Eliminar rutinas asignadas
+  rutinas=rutinas.filter(r=>r.miembroId!==mid);
+  // Eliminar asistencias
+  asistencia=asistencia.filter(a=>a.miembroId!==mid);
+  // Eliminar pagos
+  pagos=pagos.filter(p=>p.miembroId!==mid);
+  // Eliminar datos locales del miembro
+  ['sg_progreso_','sg_medidas_ini_','sg_nutri_','sg_carrito_','sg_reservas_','sg_ob_','sg_logros_'].forEach(k=>{
+    localStorage.removeItem(k+mid);
+  });
+  save();
+  renderTab('miembros');
+  toast('🗑 '+nombre+' eliminado correctamente');
+}
 
 applyTheme();
 // Cargar configuración de config.js

@@ -18,7 +18,7 @@ window.SIRYX_CONFIG = {
 
   // LICENCIA DEL GYM (generada desde el keygen)
   gymId:  'id_del_gym',       // arnold_gym
-  gymKey: '',                 // 0FVF-0G2A-0765
+  gymKey: '',                 // pago invalido
 
   // API DE INTELIGENCIA ARTIFICIAL
   groqKey: '',                // Tu clave de Groq (console.groq.com)

@@ -17,6 +17,6 @@
  */
 
 window.SIRYX_CONFIG = {
-  gymId:  '',   // ID del cliente (mismo que en el keygen)
-  gymKey: '',   // Clave XXXX-XXXX-XXXX del keygen
+  gymId:  'arnold_gym',   // ID del cliente (mismo que en el keygen)
+  gymKey: '0FVG-0G2A-5683',   // Clave XXXX-XXXX-XXXX del keygen
 };

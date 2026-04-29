@@ -811,6 +811,26 @@ select.f-input option{background:var(--s2)}
         </div>
       </div>
 
+      <!-- CLAVES DE ACCESO -->
+      <div style="border-top:1px solid var(--border);padding-top:12px">
+        <div style="font-size:11px;color:var(--accent);font-weight:700;font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🔐 Claves de acceso</div>
+        <div class="f-field">
+          <label>Clave del Administrador</label>
+          <input class="f-input" id="cfgClaveAdmin" type="password" placeholder="••••••••" autocomplete="new-password">
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">Déjala vacía para no cambiarla</div>
+        </div>
+        <div class="f-field" style="margin-top:8px">
+          <label>Clave del Entrenador</label>
+          <input class="f-input" id="cfgClaveTrainer" type="password" placeholder="••••••••" autocomplete="new-password">
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">Déjala vacía para no cambiarla</div>
+        </div>
+        <div class="f-field" style="margin-top:8px">
+          <label>Clave para Clientes (misma para todos)</label>
+          <input class="f-input" id="cfgClaveCliente" type="password" placeholder="••••••••" autocomplete="new-password">
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">Compártela con todos tus clientes</div>
+        </div>
+      </div>
+
       <!-- BACKUP -->
       <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;gap:8px">
         <button class="btn btn-outline" onclick="exportarDatos()" style="flex:1;font-size:11px;clip-path:none">⬇ Exportar backup</button>
